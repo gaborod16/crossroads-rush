@@ -1,31 +1,80 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const bodyParser = require('body-parser');
-router.use(bodyParser.urlencoded({ extended: true }));
 
 const User = require('./models/user');
+
+//** SESSION FUNCTIONS **//
+
+function createSession(req, res, user) {
+	req.session.username = user.username;
+};
+
+function verifySession(req, res, callback) {
+	if (req.session.username == null) {
+		res.redirect('/');
+	}
+	else {
+		callback(req, res);
+	}
+};
+
+function hasSession(req, res, callback) {
+	if (req.session.username != null) {
+		res.redirect('menu');
+	}
+	else {
+		callback(req, res);
+	}
+};
+
+function deleteSession(req, res) {
+	req.session.destroy(function(err) {
+		if (err) {
+			res.negotiate(err);
+		}
+		res.redirect('/');
+	});
+};
+
+//------------//
 
 //** GETS **//
 
 // WELCOME SCREEN
 router.get('/', function (req, res) {
-  res.render('index');
+	hasSession(req, res, 
+		function (req, res) {
+			res.render('index');
+		}
+	);
 });
 
 // REGISTER SCREEN
 router.get('/register', function (req, res) {
-	res.status(200).render('register');
+	hasSession(req, res, 
+		function (req, res) {
+			res.status(200).render('register');
+		}
+	);
 });
 
 // LOGIN SCREEN
 router.get('/login', function (req, res) {
-	res.status(200).render('login', {errors: ''});
+	hasSession(req, res, 
+		function (req, res) {
+			res.status(200).render('login', {errors: ''});
+		}
+	);
 });
 
 // MENU SCREEN
 router.get('/menu', function (req, res) {
-	res.status(200).render('menu');
+	verifySession(req, res, 
+		function (req, res) {
+			res.status(200).render('menu');
+		}
+	);
 });
 
 //------------//
@@ -56,6 +105,7 @@ router.post('/register', function (req, res) {
 					if (err || user == null) {
 						return res.status(500).render('register', {errors: "There was a problem creating the user."});
 					}
+					createSession(req, res, user);
 					res.status(200).redirect('/menu');
 				});
 			});
@@ -77,6 +127,7 @@ router.post('/login', function (req, res) {
 				if(err) {
 					return res.status(500).render('login', {errors: "Wrong password."});
 				}
+				createSession(req, res, user);
 				res.status(200).redirect('/menu');
 			});
 		}
@@ -84,47 +135,5 @@ router.post('/login', function (req, res) {
 });
 
 //------------//
-
-
-// router.get('/:id', function(req, res) {
-
-// 	User.findById(req.params.id, function (err, user) {
-// 		if (err) {
-// 			return res.status(500).send("There was a problem finding the user.");
-// 		}
-// 		else if (!user) {
-//		 	return res.status(404).send("No user found.");
-//		 }
-//		 res.status(200).send(user);
-// 	})
-// });
-
-// router.put('/:id', function (req, res) {
-	
-//	 User.findByIdAndUpdate(req.params.id, req.body, {new: true}, function (err, user) {
-//		 if (err) {
-//		 	return res.status(500).send("There was a problem updating the user.");
-//		 }
-//		 res.status(200).send(user);
-//	 });
-// });
-
-// router.delete('/:id', function (req, res) {
-//	 User.findByIdAndRemove(req.params.id, function (err, user) {
-//		 if (err) {
-//		 	return res.status(500).send("There was a problem deleting the user.");
-//		 }
-//		 res.status(200).send("User " + user.username + " was deleted.");
-//	 });
-// });
-
-// router.get('/', function (req, res) {
-//	 User.find({}, function (err, users) {
-//		 if (err) {
-//		 	return res.status(500).send("There was a problem finding the users.");
-//		 }
-//		 res.status(200).send(users);
-//	 });
-// });
 
 module.exports = router;
