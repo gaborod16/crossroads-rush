@@ -1,0 +1,25 @@
+html(lang='en') 
+	head
+		link(rel='stylesheet', href='/bower/bootstrap/dist/css/bootstrap.css')
+		link(rel='stylesheet', href='/css/style.css')
+		title Crossroads Rush!
+	body
+		br
+		.container
+			div.row
+				div.col
+				div.col-9
+					.jumbotron.menu
+						header
+							h1.display-3 Crossroads Rush!
+							hr
+						body
+							block content
+					footer
+						p Crossroads Rush! Copyright &copy; Gabriel Rodrigues 2017
+				div.col
+
+		script(src="/bower/jquery/dist/jquery.js")
+		script(src='/bower/bootstrap/dist/js/bootstrap.js')
+		script(src="/socket.io/socket.io.js")
+		block scripts

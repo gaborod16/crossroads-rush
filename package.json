@@ -1,0 +1,29 @@
+{
+  "name": "crossroads-rush",
+  "version": "1.0.0",
+  "description": "Online crossing roads game",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "start": "nodemon src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaborod16/crossroads-rush.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gaborod16/crossroads-rush/issues"
+  },
+  "homepage": "https://github.com/gaborod16/crossroads-rush#readme",
+  "dependencies": {
+    "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "mongodb": "^3.0.1",
+    "mongoose": "^5.0.0-rc1",
+    "pug": "^2.0.0-rc.4",
+    "socket.io": "^2.0.4"
+  }
+}

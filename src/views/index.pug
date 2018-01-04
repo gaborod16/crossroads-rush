@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h3 Welcome! 
+    small.text-muted Are you feeling the rush?
+  br
+  div.row
+    div.col-6
+      form(method='GET' action='/login')
+        button.btn.btn-lg.btn-block.btn-outline-primary(type='submit') Login
+    div.col-6
+      form(method='GET' action='/register')
+        button.btn.btn-lg.btn-block.btn-outline-primary(type='submit') Register

@@ -1,0 +1,39 @@
+extends layout
+
+block content
+  div.container
+    h2 Login
+    br
+    form#login-form(method='POST' action='/login')
+      div.form-group
+        label(for='username') Username:
+        input#username.form-control(type='text', placeholder='Username' name='username')
+      div.form-group
+        label(for='pass') Password:
+        input#pass.form-control(type='password', placeholder='Password' name='password')
+
+      mixin alertBody
+        h5.alert-heading Errors
+        p(name='errors')= errors
+        button.close#close-errors(aria-label='Close')
+          span(aria-hidden='true') &times;
+
+      if errors
+        div.alert.alert-secondary.alert-dismissible#login-errors(role='alert')
+          +alertBody
+      else
+        div.alert.alert-secondary.alert-dismissible.hidden#login-errors(role='alert')
+          +alertBody
+
+      button.btn.btn-lg.btn-outline-primary.btn-block(type='submit') Login
+
+    hr
+
+    form(method='GET' action='/register')
+      div.row
+        div.col-2.text-center Or
+        div.col
+          button.btn.btn-block.btn-outline-secondary(type='submit') Register
+
+block scripts
+  script(src="/js/login.js")

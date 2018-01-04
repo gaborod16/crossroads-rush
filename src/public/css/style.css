@@ -1,0 +1,19 @@
+.jumbotron {
+	padding: 4rem 8rem;
+}
+
+.hidden {
+	display: none;
+}
+
+footer {
+	color: white;
+}
+
+body {
+	background: 
+		linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)),
+        rgba(0,0,0,0.35) 
+        url("/assets/sheeps.jpg");
+	background-size: cover;
+}
