@@ -22,7 +22,15 @@
 }
 
 .map-creator-btn:hover img {
-	background-color: #BBCCFF;
+	background-color: #CCCCCC;
+}
+
+.map-creator-btn:active img {
+	background-color: #78a3e8;
+}
+
+.map-btn-selected {
+	background-color: #78a3e8;
 }
 
 footer {
