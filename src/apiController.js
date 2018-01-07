@@ -3,11 +3,13 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 
 const User = require('./models/user');
+const GameMap = require('./models/gameMap');
 
 //** SESSION FUNCTIONS **//
 
 function createSession(req, res, user) {
 	req.session.username = user.username;
+	console.log('User ' + req.session.username + ' logged in!');
 };
 
 function verifySession(req, res, callback) {
@@ -29,6 +31,7 @@ function hasSession(req, res, callback) {
 };
 
 function deleteSession(req, res) {
+	console.log('User ' + req.session.username + ' logged out!');
 	req.session.destroy(function(err) {
 		if (err) {
 			res.negotiate(err);
@@ -72,7 +75,55 @@ router.get('/login', function (req, res) {
 router.get('/menu', function (req, res) {
 	verifySession(req, res, 
 		function (req, res) {
-			res.status(200).render('menu');
+			res.status(200).render('menu', {username: req.session.username});
+		}
+	);
+});
+
+// MAIN MENU SCREEN
+router.get('/menu/main', function (req, res) {
+	verifySession(req, res, 
+		function (req, res) {
+			res.status(200).render('main_menu');
+		}
+	);
+});
+
+// MAPS MENU SCREEN
+router.get('/menu/maps', function (req, res) {
+	verifySession(req, res, 
+		function (req, res) {
+
+			var maps = [
+				{id: 1, name: 'map1ha', owner: 'gabe'},
+				{id: 2, name: 'map2', owner: 'gabe'},
+				{id: 3, name: 'map3', owner: 'gabe'}
+			];
+
+			res.status(200).render('map_menu', {maps: maps});
+		}
+	);
+});
+
+// MAP CREATOR SCREEN
+router.get('/map_creator', function (req, res) {
+	verifySession(req, res, 
+		function (req, res) {
+			res.status(200).render('map_creator', {map: 'map here!'});
+		}
+	);
+});
+
+// GET USER'S MAPS
+router.get('/user/maps', function (req, res) {
+	verifySession(req, res, 
+		function (req, res) {
+			var maps = [
+				{id: 1, name: 'map1', owner: 'gabe'},
+				{id: 2, name: 'map2', owner: 'gabe'},
+				{id: 3, name: 'map3', owner: 'gabe'}
+			];
+			res.status(200).send(maps);
 		}
 	);
 });
@@ -81,9 +132,29 @@ router.get('/menu', function (req, res) {
 
 //** POSTS **//
 
+// HANDLES THE CREATION OF A MAP
+router.post('/user/map/new', function (req, res) {
+	verifySession(req, res, 
+		function (req, res) {
+			GameMap.create({
+				name: req.body.name,
+				owner: req.body.owner,
+				size: req.body.size,
+				config: req.body.config,
+				text: req.body.text
+			},
+			function (err, gameMap) {
+				if (err || gameMap == null) {
+					return res.status(500).send("There was a problem creating the map: " + err);
+				}
+				console.log("Map created successfully!");
+			});
+		}
+	);
+});
+
 // HANDLE REGISTER
 router.post('/register', function (req, res) {
-
 	User.findOne(
 		{
 			username: req.body.username
@@ -132,6 +203,11 @@ router.post('/login', function (req, res) {
 			});
 		}
 	);
+});
+
+// HANDLE LOGOUT
+router.post('/logout', function (req, res) {
+	deleteSession(req, res);
 });
 
 //------------//

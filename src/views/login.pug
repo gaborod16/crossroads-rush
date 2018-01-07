@@ -2,7 +2,7 @@ extends layout
 
 block content
   div.container
-    h2 Login
+    h3 Login
     br
     form#login-form(method='POST' action='/login')
       div.form-group
@@ -15,7 +15,7 @@ block content
       mixin alertBody
         h5.alert-heading Errors
         p(name='errors')= errors
-        button.close#close-errors(aria-label='Close')
+        button.close#close-errors(aria-label='Close' type='button')
           span(aria-hidden='true') &times;
 
       if errors

@@ -1,9 +1,28 @@
+#map {
+	height: 45%;
+}
+
 .jumbotron {
 	padding: 4rem 8rem;
 }
 
 .hidden {
 	display: none;
+}
+
+.wide-container {
+	max-width: 80%;
+}
+
+.map-creator-btn {
+	width: 10%;
+	min-width: 100px;
+	height: width;
+	margin-right: 2em;
+}
+
+.map-creator-btn:hover img {
+	background-color: #BBCCFF;
 }
 
 footer {

@@ -1,0 +1,8 @@
+block mixin-menu
+	mixin menu-button(name, id)
+		button.btn.btn-lg.btn-outline-primary.btn-block(id=id type='button')= name
+	mixin menu-submit-button(name, id, url)
+		form(method='GET' action=url)
+			button.btn.btn-lg.btn-outline-primary.btn-block(id=id type='submit')= name
+
+block menu-content

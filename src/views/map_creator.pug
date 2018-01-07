@@ -1,0 +1,26 @@
+extends wide_layout
+
+mixin map-button(id, name, imgSrc)
+  figure.figure.map-creator-btn
+    img.figure-img.img-thumbnail.rounded(id=id src=imgSrc)
+    figcaption.figure-caption.text-center= name
+
+block content
+  h3 Map creator! 
+    small.font-weight-light Let's get the rush started!
+  br
+
+  div#map
+
+  br
+
+  div#map-buttons
+    +map-button('road-btn', 'Road', '/assets/road.png')
+    +map-button('meadow-btn', 'Meadow', '/assets/meadow.jpg')
+    +map-button('config-map-btn','Configure map', '/assets/gear.png')
+
+
+block scripts
+  script(src='/js/pixi.min.js')
+  script(src='/js/map_creator.js')
+  include classes_scripts

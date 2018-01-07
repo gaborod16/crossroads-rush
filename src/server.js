@@ -15,6 +15,7 @@ app.use('/js', express.static(path.join(__dirname, '/public/js/')));
 app.use('/css', express.static(path.join(__dirname, '/public/css/')));
 app.use('/assets', express.static(path.join(__dirname, '/public/assets/')));
 app.use('/bower', express.static(path.join(__dirname, '/public/bower_components/')));
+app.use('/classes', express.static(path.join(__dirname, '/public/js/models')));
 
 // SETUP PUG TEMPLATES
 app.set('views', path.join(__dirname, 'views'));

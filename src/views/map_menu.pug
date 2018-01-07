@@ -1,0 +1,24 @@
+extends menu_skeleton
+
+block menu-content
+	+menu-submit-button('Create map', 'add-map-btn', '/map_creator')
+
+	br
+	div.row
+		div.col-5
+			hr
+		div.col.text-center
+			small.text-muted or
+		div.col-5
+			hr
+	br
+
+	div.input-group.btn-block
+		div.input-group-prepend
+			button.btn.btn-primary(type='button' disabled) Pick a map!
+		select.custom-select(id='mapSelection')
+			each map in maps
+				option(value=map.id) #{map.name}
+
+	+menu-submit-button('Edit map', 'edit-map-btn', '/map_creator')
+	+menu-button('Delete map', 'del-map-btn')
