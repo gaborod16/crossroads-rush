@@ -35,9 +35,12 @@ $(document).ready(function(){
 	loader
 		.add([
 			'/assets/road.png',
-			'/assets/meadow.jpg',
+			'/assets/grass.png',
 			'/assets/rock.png',
-			'/assets/gift.png',
+			'/assets/powerup.png',
+			'/assets/car.png',
+			'/assets/bush.png',
+			'/assets/sheep.png'
 		])
 		.on('progress', progressHandler)
 		.load(setup)
@@ -47,11 +50,11 @@ $(document).ready(function(){
 	}
 
 	// Map editor variables
-	var tMap = undefined;
+	var tileMap = undefined;
 
 	function setup() {
 		console.log('Setting up');
-		tMap = new TileMap(xTiles, yTiles, tileSize, app.stage, app.renderer);
+		tileMap = new TileMap(xTiles, yTiles, tileSize, app.stage, app.renderer);
 
 		// console.log(resources['/assets/rock.png'].texture);
 
@@ -70,26 +73,38 @@ $(document).ready(function(){
 
 	$('#road-btn').click(function(e){
 		console.log('road clicked!');
-		selectMapButton(this, EntityType.TRANSIT_ZONE);
+		selectMapButton(this, VisualEntityModel.TRANSIT_ZONE, SelectionType.COLUMN);
 	});
-	$('#meadow-btn').click(function(e){
-		console.log('meadow clicked!');
-		selectMapButton(this, EntityType.SAFE_ZONE);
+	$('#grass-btn').click(function(e){
+		console.log('grass clicked!');
+		selectMapButton(this, VisualEntityModel.SAFE_ZONE, SelectionType.COLUMN);
+	});
+	$('#bush-btn').click(function(e){
+		console.log('buh clicked!');
+		selectMapButton(this, MapableEntityModel.BUSH, SelectionType.SIMPLE);
+	});
+	$('#rock-btn').click(function(e){
+		console.log('rock clicked!');
+		selectMapButton(this, MapableEntityModel.ROCK, SelectionType.SIMPLE);
+	});
+	$('#car-btn').click(function(e){
+		console.log('car clicked!');
+		selectMapButton(this, MapableEntityModel.CAR, SelectionType.SIMPLE);
 	});
 	$('#config-map-btn').click(function(e){
 		console.log('config map clicked!');
 		// selectMapButton(this, 'none');
 	});
 
-	function selectMapButton (btnTag, type) {
+	function selectMapButton (btnTag, modelType, selectionType) {
 		if ($(btnTag).hasClass('map-btn-selected')) {
 			$(btnTag).removeClass('map-btn-selected');
-			tMap.setSelectedZone(EntityType.NONE);
+			tileMap.resetSelection();
 		}
 		else {
 			$('.map-creator-btn img').removeClass('map-btn-selected');
 			$(btnTag).addClass('map-btn-selected');
-			tMap.setSelectedZone(type);
+			tileMap.setModelType(modelType, selectionType);
 		}
 	}
 });

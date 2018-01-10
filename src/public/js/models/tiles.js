@@ -1,6 +1,11 @@
+const HIGHLIGHT_COLOR = 0xAFCBF7;
+const WHITE_COLOR = 0xFFFFFF;
+const CELL_COLOR = 0xDEDEDE;
+
 const SelectionType = {
 	SIMPLE: 'simple',
-	MULTIPLE: 'multiple'
+	COLUMN: 'column',
+	NONE: 'none'
 };
 
 class TileMap {
@@ -8,8 +13,8 @@ class TileMap {
 		// Initialize Tile static properties
 		Tile.stage = stage;
 		Tile.size = tileSize;
-		Tile.selectionType = SelectionType.SIMPLE;
-		Tile.selectedZone = EntityType.NONE;
+		Tile.selectionType = SelectionType.NONE;
+		Tile.modelType = undefined;
 
 		// Initialize TileMap
 		this._stage = stage;
@@ -24,38 +29,76 @@ class TileMap {
 			this._grid[i] = [];
 			for (var j = 0; j < yTiles; j++) {
 				this._grid[i][j] = new Tile(new Position(i*tileSize,j*tileSize));
-				this._grid[i][j].setMouseOverEvent(this.genTileMouseover(this._grid[i]));
-				this._grid[i][j].setMouseOutEvent(this.genTileMouseout(this._grid[i]));
-				this._grid[i][j].setMouseClickEvent(this.genTileMouseClick(this._grid[i]));
+				this._grid[i][j].setMouseOverEvent(this.genTileMouseover(this._grid, i, j));
+				this._grid[i][j].setMouseOutEvent(this.genTileMouseout(this._grid, i, j));
+				this._grid[i][j].setMouseClickEvent(this.genTileMouseClick(this._grid, i, j));
 			}
 		}
 	}
 
-	setSelectedZone (zoneType) {
-		Tile.selectedZone = zoneType;
-		Tile.selectionType = SelectionType.MULTIPLE;
+	resetSelection () {
+		Tile.modelType = undefined;
+		Tile.selectionType = SelectionType.NONE;
 	}
 
-	genTileMouseover (column) {
+	setModelType (modelType, selectionType) {
+		Tile.modelType = modelType;
+		Tile.selectionType = selectionType;
+	}
+
+	genTileMouseover (tilesMap, column, row) {
 		return function (mouseData) {
-			for (var i = 0; i < column.length; i++) {
-				column[i].tint(0xAFCBF7);
+			switch (Tile.selectionType) {
+				case SelectionType.COLUMN:
+					for (var i = 0; i < tilesMap[column].length; i++) {
+						tilesMap[column][i].tint(HIGHLIGHT_COLOR);
+					}
+					break;
+
+				case SelectionType.SIMPLE:
+					tilesMap[column][row].tint(HIGHLIGHT_COLOR);
+					break;
+
+				default:
+					break;
 			}
 		}
 	}
 
-	genTileMouseout (column) {
+	genTileMouseout (tilesMap, column, row) {
 		return function (mouseData) {
-			for (var i = 0; i < column.length; i++) {
-				column[i].tint(0xFFFFFF);
+			switch (Tile.selectionType) {
+				case SelectionType.COLUMN:
+					for (var i = 0; i < tilesMap[column].length; i++) {
+						tilesMap[column][i].tint(WHITE_COLOR);
+					}
+					break;
+
+				case SelectionType.SIMPLE:
+					tilesMap[column][row].tint(WHITE_COLOR);
+					break;
+
+				default:
+					break;
 			}
 		}
 	}
 
-	genTileMouseClick (column) {
+	genTileMouseClick (tilesMap, column, row) {
 		return function (mouseData) {
-			for (var i = 0; i < column.length; i++) {
-				column[i].changeTexture(PIXI.loader.resources[Tile.selectedZone.resource].texture);
+			switch (Tile.selectionType) {
+				case SelectionType.COLUMN:
+					for (var i = 0; i < tilesMap[column].length; i++) {
+						tilesMap[column][i].changeTexture(PIXI.loader.resources[Tile.modelType.getResource()].texture);
+					}
+					break;
+
+				case SelectionType.SIMPLE:
+					tilesMap[column][row].changeChild(Tile.modelType);
+					break;
+
+				default:
+					break;
 			}
 		}
 	}
@@ -71,28 +114,23 @@ class TileMap {
 
 	_createTileTexture (tileSize) {
 		let tile = new PIXI.Graphics();
-		tile.lineStyle(1, 0xFFFFFF, 1);
-		tile.beginFill(0xDEDEDE);
+		tile.lineStyle(1, WHITE_COLOR, 1);
+		tile.beginFill(CELL_COLOR);
 		tile.drawRect(0, 0, this._tileSize, this._tileSize);
 		tile.endFill();
-		Tile.tileTexture = this._renderer.generateTexture(tile);
+		Tile.defaultTileTexture = this._renderer.generateTexture(tile);
 	}
 }
 
-
 class Tile {
-
 	constructor (position) {
-		// this._tile = new PIXI.Graphics();
-		// this._tile.lineStyle(1, 0x222222, 1);
-		// this._tile.beginFill(0xFFFFFF);
-		// this._tile.drawRect(position.getX(), position.getY(), Tile.size, Tile.size);
-		this._tile = new PIXI.Sprite(Tile.tileTexture);
+		this._tile = new PIXI.Sprite(Tile.defaultTileTexture);
 		this._tile.x = position.getX();
 		this._tile.y = position.getY();
 		this._tile.width = Tile.size;
 		this._tile.height = Tile.size;
 		this._tile.interactive = true;
+		this._resetChild();
 
 		Tile.stage.addChild(this._tile);
 	}
@@ -103,6 +141,28 @@ class Tile {
 
 	changeTexture (texture) {
 		this._tile.texture = texture;
+	}
+
+	_resetChild () {
+		this._child = {
+			obj: undefined,
+			type: undefined
+		};
+	}
+
+	changeChild (childType) {
+		if (this._child.obj) {
+			let onlyRemove = this._child.type == childType;
+			this._tile.removeChild(this._child.obj);
+			this._resetChild();
+			if (onlyRemove) {
+				return;
+			}
+		}
+		let texture = PIXI.loader.resources[childType.getResource()].texture
+		this._child.obj = new PIXI.Sprite(texture);
+		this._child.type = childType;
+		this._tile.addChild(this._child.obj);
 	}
 
 	setMouseOverEvent (func) {
@@ -117,10 +177,9 @@ class Tile {
 		this._tile.click = func;
 	}
 }
-
-// static properties
+// Tile's static properties
 Tile.selectionType = undefined;
-Tile.selectedZone = undefined;
-Tile.tileTexture = undefined;
+Tile.modelType = undefined;
+Tile.defaultTileTexture = undefined;
 Tile.stage = undefined;
 Tile.size = undefined;
