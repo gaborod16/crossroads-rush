@@ -1,3 +1,26 @@
+const GameLevel = {
+    LEVEL_1: {
+        code: 'LEVEL_1',
+        carSpace: 6 // Number of cells before appearing another car
+    },
+    LEVEL_2: {
+        code: 'LEVEL_2',
+        carSpace: 5
+    },
+    LEVEL_3: {
+        code: 'LEVEL_3',
+        carSpace: 4
+    },
+    LEVEL_4: {
+        code: 'LEVEL_4',
+        carSpace: 3
+    },
+    LEVEL_5: {
+        code: 'LEVEL_5',
+        carSpace: 2
+    } 
+}
+
 const IndexLayer = {
     NO_LEVEL: 0,
     LEVEL_1: 1,  // First to be drawn, therefore, on bottom.

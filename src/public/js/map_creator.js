@@ -94,6 +94,7 @@ $(document).ready(function(){
 	$('#config-map-btn').click(function(e){
 		console.log('config map clicked!');
 		// selectMapButton(this, 'none');
+		console.log(tileMap.getTextMap());
 	});
 
 	function selectMapButton (btnTag, modelType, selectionType) {

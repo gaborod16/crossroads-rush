@@ -89,7 +89,7 @@ class TileMap {
 			switch (Tile.selectionType) {
 				case SelectionType.COLUMN:
 					for (var i = 0; i < tilesMap[column].length; i++) {
-						tilesMap[column][i].changeTexture(PIXI.loader.resources[Tile.modelType.getResource()].texture);
+						tilesMap[column][i].changeZoneType(Tile.modelType);
 					}
 					break;
 
@@ -103,13 +103,47 @@ class TileMap {
 		}
 	}
 
-	scream () {
+	getTextMap () {
+		var textMap = {
+			size: {cols: this._cols, rows: this._rows},
+			config: {
+				sheepSpeed: 1.0,
+				nLives: 1,
+				level: GameLevel.LEVEL_1.code
+			},
+			rawMap: []
+		};
+		let tempChildType = undefined;
+
 		for (var i = 0; i < this._cols; i++) {
-			this._grid[i] = [];
+			console.log(textMap);
+			textMap.rawMap[i] = {};
+			textMap.rawMap[i].type = this._grid[i][0].getType().getCode();
+			textMap.rawMap[i].objs = [];
+			textMap.rawMap[i].vehicles = [];
 			for (var j = 0; j < this._rows; j++) {
-				console.log("Imagine");
+				let tempChildType = this._grid[i][j].getChildType();
+
+				if (tempChildType) {
+					textMap.rawMap[i].objs.push(tempChildType.getCode() + j);
+				}
+
+				WE SHOULD KNOW THE TYPE OF THE MODEL, OTHERWISE WE CANNOT KNWO IF IT IS A VEHICLE OR InanimateObject
+				
+				// switch (tempChildType) {
+				// 	case 'Vehicle':
+				// 		textMap.rawMap[i].objs.push({v: tempChildType.getCode(), f: Math.floor(Math.random()*10) + 1});
+				// 		break;
+				// 	case 'InanimateObject':
+				// 		textMap.rawMap[i].objs.push(tempChildType.getCode() + j);
+				// 		break;
+				// 	default:
+				// 		textMap.rawMap[i].objs.push(tempChildType.getCode() + j);
+				// 		break;
+				// }
 			}
 		}
+		return textMap;
 	}
 
 	_createTileTexture (tileSize) {
@@ -130,17 +164,10 @@ class Tile {
 		this._tile.width = Tile.size;
 		this._tile.height = Tile.size;
 		this._tile.interactive = true;
+		this._type = undefined;
 		this._resetChild();
 
 		Tile.stage.addChild(this._tile);
-	}
-
-	tint (color) {
-		this._tile.tint = color;
-	}
-
-	changeTexture (texture) {
-		this._tile.texture = texture;
 	}
 
 	_resetChild () {
@@ -148,6 +175,23 @@ class Tile {
 			obj: undefined,
 			type: undefined
 		};
+	}
+
+	getType () {
+		return this._type;
+	}
+
+	getChildType () {
+		return this._child.type;
+	}
+
+	tint (color) {
+		this._tile.tint = color;
+	}
+
+	changeZoneType (zoneType) {
+		this._type = zoneType;
+		this._tile.texture = PIXI.loader.resources[zoneType.getResource()].texture;
 	}
 
 	changeChild (childType) {
