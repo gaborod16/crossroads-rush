@@ -2,9 +2,7 @@ VisualEntityModel.SHEEP = new VisualEntityModel('sh', '/assets/sheep.png');
 
 class Sheep extends MobileEntity {
     constructor (id, position) {
-        super(id, position);
-        this._resource = VisualEntityModel.SHEEP.getResource();
-        this._code = VisualEntityModel.SHEEP.getCode();
+        super(id, position, VisualEntityModel.SHEEP);
         this._layer = IndexLayer.LEVEL_2;
         this._alive = true;
         this._currentState = 'sheepState';

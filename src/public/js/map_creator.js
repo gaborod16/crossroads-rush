@@ -72,28 +72,25 @@ $(document).ready(function(){
 	// UI 
 
 	$('#road-btn').click(function(e){
-		console.log('road clicked!');
 		selectMapButton(this, VisualEntityModel.TRANSIT_ZONE, SelectionType.COLUMN);
 	});
 	$('#grass-btn').click(function(e){
-		console.log('grass clicked!');
 		selectMapButton(this, VisualEntityModel.SAFE_ZONE, SelectionType.COLUMN);
 	});
 	$('#bush-btn').click(function(e){
-		console.log('buh clicked!');
-		selectMapButton(this, MapableEntityModel.BUSH, SelectionType.SIMPLE);
+		selectMapButton(this, VisualEntityModel.BUSH, SelectionType.SIMPLE);
 	});
 	$('#rock-btn').click(function(e){
-		console.log('rock clicked!');
-		selectMapButton(this, MapableEntityModel.ROCK, SelectionType.SIMPLE);
+		selectMapButton(this, VisualEntityModel.ROCK, SelectionType.SIMPLE);
+	});
+	$('#powerup-btn').click(function(e){
+		selectMapButton(this, VisualEntityModel.POWER_UP_FLASH, SelectionType.SIMPLE);
 	});
 	$('#car-btn').click(function(e){
-		console.log('car clicked!');
-		selectMapButton(this, MapableEntityModel.CAR, SelectionType.SIMPLE);
+		selectMapButton(this, VisualEntityModel.CAR, SelectionType.SIMPLE);
 	});
 	$('#config-map-btn').click(function(e){
 		console.log('config map clicked!');
-		// selectMapButton(this, 'none');
 		console.log(tileMap.getTextMap());
 	});
 

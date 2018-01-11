@@ -56,6 +56,9 @@ class VisualEntityModel {
     getCode() {
         return this._code;
     }
+    getEntity() {
+        return this._entity;
+    }
     instantiateEntity(id, position) {
         return new this._entity(id, position);
     }
@@ -65,7 +68,7 @@ class VisualEntityModel {
     static findByCode(code) {
         return VisualEntityModel.HASH[code];
     }
-    static instantiateEntityBuCode(code, id, position) {
+    static instantiateEntityByCode(code, id, position) {
         return new VisualEntityModel.HASH[code].getEntity(id, position);
     }
 }
@@ -73,21 +76,27 @@ VisualEntityModel.HASH = {};
 VisualEntityModel.DEFAULT = new VisualEntityModel(undefined, '??', '/assets/no_image.png');
 
 class VisualEntity {
-    constructor (id, position) {
+    constructor (id, position, model=VisualEntityModel.DEFAULT) {
         this._id = id;
-        this._code = VisualEntityModel.DEFAULT.getCode();
-        this._resource = VisualEntityModel.DEFAULT.getResource();
+        this._model = model;
         this._layer = IndexLayer.NO_LEVEL;
         this._position = position;
+        this._sprite = undefined;
     }
     getId() {
         return this._id;
     }
+    getModel() {
+        return this._model;
+    }
     getCode() {
-        return this._code;
+        return this._model.getCode();
+    }
+    getSprite() {
+        return this._sprite;
     }
     getResource() {
-        return this._resource;
+        return this._model.getResource();
     }
     getLayer() {
         return this._layer;
@@ -95,8 +104,11 @@ class VisualEntity {
     getPosition() {
         return this._position;
     }
-    getCodeFormatted() {
+    getMappedEntity() {
         return ''
+    }
+    setSprite(sprite) {
+        this._sprite = sprite;
     }
 }
 
@@ -111,15 +123,5 @@ class MobileEntity extends VisualEntity {
     }
     addMoveCommand(command) {
         this._moveCommand = command;
-    }
-}
-
-class MapableEntityModel extends VisualEntityModel {
-    constructor(entity, code, resource, onTopOf) {
-        super(entity, code, resource);
-        this._onTopOf = onTopOf;
-    }
-    canBeOnTopOf(zoneType) {
-        return this._onTopOf.includes(zoneType);
     }
 }

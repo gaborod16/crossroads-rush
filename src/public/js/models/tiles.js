@@ -89,7 +89,7 @@ class TileMap {
 			switch (Tile.selectionType) {
 				case SelectionType.COLUMN:
 					for (var i = 0; i < tilesMap[column].length; i++) {
-						tilesMap[column][i].changeZoneModel(Tile.selectedModel);
+						tilesMap[column][i].changeZone(Tile.selectedModel);
 					}
 					break;
 
@@ -113,20 +113,12 @@ class TileMap {
 			},
 			rawMap: []
 		};
-		let tempChildModel = undefined;
-		let tempEntity = undefined;
 
 		for (var i = 0; i < this._cols; i++) {
-			console.log(textMap);
-			textMap.rawMap[i] = {};
-			textMap.rawMap[i].zone = this._grid[i][0].getZoneModel().getCode();
-			textMap.rawMap[i].entities = [];
+			textMap.rawMap[i] = this._grid[i][0].getZone().getMappedEntity();
 			for (var j = 0; j < this._rows; j++) {
-				tempChildModel = this._grid[i][j].getChildModel();
-
-				if (tempChildModel) {
-					tempEntity = tempChildModel.instantiateEntity(0, new Position(i,j));
-					textMap.rawMap[i].entities.push(tempEntity.getCodeFormatted());
+				if (this._grid[i][j].getChild()) {
+					textMap.rawMap[i].entities.push(this._grid[i][j].getChild().getMappedEntity());
 				}
 			}
 		}
@@ -151,49 +143,52 @@ class Tile {
 		this._tile.width = Tile.size;
 		this._tile.height = Tile.size;
 		this._tile.interactive = true;
-		this._zoneModel = undefined;
-		this._resetChild();
+		this._position = new Position(
+			Math.floor(position.getX()/Tile.size),
+			Math.floor(position.getY()/Tile.size)
+		);
+		this._zone = undefined;
 
 		Tile.stage.addChild(this._tile);
 	}
 
-	_resetChild () {
-		this._child = {
-			obj: undefined,
-			model: undefined
-		};
+	_removeChild () {
+		this._tile.removeChild(this._zone.getChild().getSprite());
+		this._zone.removeChild();
 	}
 
-	getZoneModel () {
-		return this._zoneModel;
+	getZone () {
+		return this._zone;
 	}
 
-	getChildModel () {
-		return this._child.model;
+	getChild () {
+		return this._zone.getChild();
 	}
 
 	tint (color) {
 		this._tile.tint = color;
 	}
 
-	changeZoneModel (zoneModel) {
-		this._zoneModel = zoneModel;
-		this._tile.texture = PIXI.loader.resources[zoneModel.getResource()].texture;
+	changeZone (zoneModel) {
+		this._zone = zoneModel.instantiateEntity(0, this._position);
+		this._tile.texture = PIXI.loader.resources[this._zone.getResource()].texture;
 	}
 
 	changeChild (childModel) {
-		if (this._child.obj) {
-			let onlyRemove = this._child.model == childModel;
-			this._tile.removeChild(this._child.obj);
-			this._resetChild();
-			if (onlyRemove) {
-				return;
+		console.log(this._position);
+		if (this._zone.allowsChildModel(childModel)) {
+			if (this._zone.hasChild()) {
+				let onlyRemove = this._zone.getChild().getModel() == childModel;
+				this._removeChild();
+				if (onlyRemove) {
+					return;
+				}
 			}
+			this._zone.setChild(childModel.instantiateEntity(0, this._position));
+			let texture = PIXI.loader.resources[this._zone.getChild().getResource()].texture
+			this._zone.getChild().setSprite(new PIXI.Sprite(texture));
+			this._tile.addChild(this._zone.getChild().getSprite());
 		}
-		let texture = PIXI.loader.resources[childModel.getResource()].texture
-		this._child.obj = new PIXI.Sprite(texture);
-		this._child.model = childModel;
-		this._tile.addChild(this._child.obj);
 	}
 
 	setMouseOverEvent (func) {
