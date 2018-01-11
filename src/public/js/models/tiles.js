@@ -14,7 +14,7 @@ class TileMap {
 		Tile.stage = stage;
 		Tile.size = tileSize;
 		Tile.selectionType = SelectionType.NONE;
-		Tile.modelType = undefined;
+		Tile.selectedModel = undefined;
 
 		// Initialize TileMap
 		this._stage = stage;
@@ -37,12 +37,12 @@ class TileMap {
 	}
 
 	resetSelection () {
-		Tile.modelType = undefined;
+		Tile.selectedModel = undefined;
 		Tile.selectionType = SelectionType.NONE;
 	}
 
-	setModelType (modelType, selectionType) {
-		Tile.modelType = modelType;
+	setSelectedModel (selectedModel, selectionType) {
+		Tile.selectedModel = selectedModel;
 		Tile.selectionType = selectionType;
 	}
 
@@ -89,12 +89,12 @@ class TileMap {
 			switch (Tile.selectionType) {
 				case SelectionType.COLUMN:
 					for (var i = 0; i < tilesMap[column].length; i++) {
-						tilesMap[column][i].changeZoneType(Tile.modelType);
+						tilesMap[column][i].changeZoneModel(Tile.selectedModel);
 					}
 					break;
 
 				case SelectionType.SIMPLE:
-					tilesMap[column][row].changeChild(Tile.modelType);
+					tilesMap[column][row].changeChild(Tile.selectedModel);
 					break;
 
 				default:
@@ -113,34 +113,21 @@ class TileMap {
 			},
 			rawMap: []
 		};
-		let tempChildType = undefined;
+		let tempChildModel = undefined;
+		let tempEntity = undefined;
 
 		for (var i = 0; i < this._cols; i++) {
 			console.log(textMap);
 			textMap.rawMap[i] = {};
-			textMap.rawMap[i].type = this._grid[i][0].getType().getCode();
-			textMap.rawMap[i].objs = [];
-			textMap.rawMap[i].vehicles = [];
+			textMap.rawMap[i].zone = this._grid[i][0].getZoneModel().getCode();
+			textMap.rawMap[i].entities = [];
 			for (var j = 0; j < this._rows; j++) {
-				let tempChildType = this._grid[i][j].getChildType();
+				tempChildModel = this._grid[i][j].getChildModel();
 
-				if (tempChildType) {
-					textMap.rawMap[i].objs.push(tempChildType.getCode() + j);
+				if (tempChildModel) {
+					tempEntity = tempChildModel.instantiateEntity(0, new Position(i,j));
+					textMap.rawMap[i].entities.push(tempEntity.getCodeFormatted());
 				}
-
-				WE SHOULD KNOW THE TYPE OF THE MODEL, OTHERWISE WE CANNOT KNWO IF IT IS A VEHICLE OR InanimateObject
-				
-				// switch (tempChildType) {
-				// 	case 'Vehicle':
-				// 		textMap.rawMap[i].objs.push({v: tempChildType.getCode(), f: Math.floor(Math.random()*10) + 1});
-				// 		break;
-				// 	case 'InanimateObject':
-				// 		textMap.rawMap[i].objs.push(tempChildType.getCode() + j);
-				// 		break;
-				// 	default:
-				// 		textMap.rawMap[i].objs.push(tempChildType.getCode() + j);
-				// 		break;
-				// }
 			}
 		}
 		return textMap;
@@ -164,7 +151,7 @@ class Tile {
 		this._tile.width = Tile.size;
 		this._tile.height = Tile.size;
 		this._tile.interactive = true;
-		this._type = undefined;
+		this._zoneModel = undefined;
 		this._resetChild();
 
 		Tile.stage.addChild(this._tile);
@@ -173,39 +160,39 @@ class Tile {
 	_resetChild () {
 		this._child = {
 			obj: undefined,
-			type: undefined
+			model: undefined
 		};
 	}
 
-	getType () {
-		return this._type;
+	getZoneModel () {
+		return this._zoneModel;
 	}
 
-	getChildType () {
-		return this._child.type;
+	getChildModel () {
+		return this._child.model;
 	}
 
 	tint (color) {
 		this._tile.tint = color;
 	}
 
-	changeZoneType (zoneType) {
-		this._type = zoneType;
-		this._tile.texture = PIXI.loader.resources[zoneType.getResource()].texture;
+	changeZoneModel (zoneModel) {
+		this._zoneModel = zoneModel;
+		this._tile.texture = PIXI.loader.resources[zoneModel.getResource()].texture;
 	}
 
-	changeChild (childType) {
+	changeChild (childModel) {
 		if (this._child.obj) {
-			let onlyRemove = this._child.type == childType;
+			let onlyRemove = this._child.model == childModel;
 			this._tile.removeChild(this._child.obj);
 			this._resetChild();
 			if (onlyRemove) {
 				return;
 			}
 		}
-		let texture = PIXI.loader.resources[childType.getResource()].texture
+		let texture = PIXI.loader.resources[childModel.getResource()].texture
 		this._child.obj = new PIXI.Sprite(texture);
-		this._child.type = childType;
+		this._child.model = childModel;
 		this._tile.addChild(this._child.obj);
 	}
 
@@ -223,7 +210,7 @@ class Tile {
 }
 // Tile's static properties
 Tile.selectionType = undefined;
-Tile.modelType = undefined;
+Tile.selectedModel = undefined;
 Tile.defaultTileTexture = undefined;
 Tile.stage = undefined;
 Tile.size = undefined;

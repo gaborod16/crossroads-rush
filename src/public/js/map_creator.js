@@ -97,7 +97,7 @@ $(document).ready(function(){
 		console.log(tileMap.getTextMap());
 	});
 
-	function selectMapButton (btnTag, modelType, selectionType) {
+	function selectMapButton (btnTag, model, selectionType) {
 		if ($(btnTag).hasClass('map-btn-selected')) {
 			$(btnTag).removeClass('map-btn-selected');
 			tileMap.resetSelection();
@@ -105,7 +105,7 @@ $(document).ready(function(){
 		else {
 			$('.map-creator-btn img').removeClass('map-btn-selected');
 			$(btnTag).addClass('map-btn-selected');
-			tileMap.setModelType(modelType, selectionType);
+			tileMap.setSelectedModel(model, selectionType);
 		}
 	}
 });

@@ -47,6 +47,8 @@ class VisualEntityModel {
     constructor (code, resource) {
         this._resource = resource;
         this._code = code;
+        this._entity = undefined;
+        VisualEntityModel.HASH[this._code] = this;
     }
     getResource() {
         return this._resource;
@@ -54,8 +56,21 @@ class VisualEntityModel {
     getCode() {
         return this._code;
     }
+    instantiateEntity(id, position) {
+        return new this._entity(id, position);
+    }
+    setEntity(entity) {
+        this._entity = entity;
+    }
+    static findByCode(code) {
+        return VisualEntityModel.HASH[code];
+    }
+    static instantiateEntityBuCode(code, id, position) {
+        return new VisualEntityModel.HASH[code].getEntity(id, position);
+    }
 }
-VisualEntityModel.DEFAULT = new VisualEntityModel('??', '/assets/no_image.png');
+VisualEntityModel.HASH = {};
+VisualEntityModel.DEFAULT = new VisualEntityModel(undefined, '??', '/assets/no_image.png');
 
 class VisualEntity {
     constructor (id, position) {
@@ -65,20 +80,23 @@ class VisualEntity {
         this._layer = IndexLayer.NO_LEVEL;
         this._position = position;
     }
-    getId () {
+    getId() {
         return this._id;
     }
-    getCode () {
+    getCode() {
         return this._code;
     }
-    getResource () {
+    getResource() {
         return this._resource;
     }
-    getLayer () {
+    getLayer() {
         return this._layer;
     }
-    getPosition () {
+    getPosition() {
         return this._position;
+    }
+    getCodeFormatted() {
+        return ''
     }
 }
 
@@ -87,18 +105,18 @@ class MobileEntity extends VisualEntity {
         super(id, position);
         this._moveCommand = undefined;
     }
-    consumeMove () {
+    consumeMove() {
         this._moveCommand.apply();
         this._moveCommand = undefined;
     }
-    addMoveCommand (command) {
+    addMoveCommand(command) {
         this._moveCommand = command;
     }
 }
 
 class MapableEntityModel extends VisualEntityModel {
-    constructor (code, resource, onTopOf) {
-        super(code, resource);
+    constructor(entity, code, resource, onTopOf) {
+        super(entity, code, resource);
         this._onTopOf = onTopOf;
     }
     canBeOnTopOf(zoneType) {

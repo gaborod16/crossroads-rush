@@ -15,6 +15,9 @@ class InanimateObject extends VisualEntity {
         super(id, position);
         this._layer = IndexLayer.LEVEL_2;
     }
+    getCodeFormatted() {
+        return {code: this._code, x: this._position.getX(), y: this._position.getY()};
+    }
 }
 
 // Sub class: Bush
@@ -28,7 +31,7 @@ class Bush extends InanimateObject {
         this._sheeps = [];
     }
 }
-
+MapableEntityModel.BUSH.setEntity(Bush);
 
 // Sub abstract class: Obstacle
 class Obstacle extends InanimateObject {
@@ -47,6 +50,8 @@ class Tree extends Obstacle {
         this._onTopOf = MapableEntityModel.TREE.getCode();
     }
 }
+MapableEntityModel.TREE.setEntity(Tree);
+
 class Rock extends Obstacle {
     constructor (id, position) {
         super(id, position);
@@ -55,6 +60,7 @@ class Rock extends Obstacle {
         this._onTopOf = MapableEntityModel.ROCK.getCode();
     }
 }
+MapableEntityModel.ROCK.setEntity(Rock);
 
 // Sub abstract class: PowerUp
 class PowerUp extends InanimateObject {
@@ -82,6 +88,8 @@ class RandomPower extends PowerUp {
         this._power = new ParkourPower(id, position);
     }
 }
+MapableEntityModel.POWER_UP_RANDOM.setEntity(RandomPower);
+
 class ParkourPower extends PowerUp {
     constructor (id, position) {
         super(id, position);
@@ -90,6 +98,8 @@ class ParkourPower extends PowerUp {
         this._onTopOf = MapableEntityModel.POWER_UP_PARKOUR.getCode();
     }
 }
+MapableEntityModel.POWER_UP_PARKOUR.setEntity(ParkourPower);
+
 class IronPower extends PowerUp {
     constructor (id, position) {
         super(id, position);
@@ -98,6 +108,8 @@ class IronPower extends PowerUp {
         this._onTopOf = MapableEntityModel.POWER_UP_IRON.getCode();
     }
 }
+MapableEntityModel.POWER_UP_IRON.setEntity(IronPower);
+
 class FlashPower extends PowerUp {
     constructor (id, position) {
         super(id, position);
@@ -106,6 +118,8 @@ class FlashPower extends PowerUp {
         this._onTopOf = MapableEntityModel.POWER_UP_FLASH.getCode();
     }
 }
+MapableEntityModel.POWER_UP_FLASH.setEntity(FlashPower);
+
 class BullyPower extends PowerUp {
     constructor (id, position) {
         super(id, position);
@@ -114,3 +128,4 @@ class BullyPower extends PowerUp {
         this._onTopOf = MapableEntityModel.POWER_UP_BULLY.getCode();
     }
 }
+MapableEntityModel.POWER_UP_BULLY.setEntity(BullyPower);

@@ -18,6 +18,7 @@ class TransitZone extends Zone {
         this._code = VisualEntityModel.TRANSIT_ZONE.getCode();
     }
 }
+VisualEntityModel.TRANSIT_ZONE.setEntity(TransitZone);
 
 class SafeZone extends Zone {
     constructor (id, position) {
@@ -26,3 +27,4 @@ class SafeZone extends Zone {
         this._code = VisualEntityModel.SAFE_ZONE.getCode();
     }
 }
+VisualEntityModel.SAFE_ZONE.setEntity(TransitZone);

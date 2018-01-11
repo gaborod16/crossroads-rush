@@ -11,6 +11,7 @@ class Sheep extends MobileEntity {
         this._currentPower = undefined;
     }
 }
+VisualEntityModel.SHEEP.setEntity(Sheep);
 
 class SheepState {
     constructor (sheep) {
