@@ -41,6 +41,6 @@ app.use('/', ApiController);
 // });
 
 // START THE SERVER
-var server = http.listen(port, function () {
+var server = http.listen(process.env.PORT || port, function () {
   console.log('Listening on port ' + port + '!');
 });

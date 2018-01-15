@@ -6,27 +6,37 @@ $(document).ready(function(){
 	function setup() {
 		console.log('Setting up');
 		let blueprint = $('#save-map-form input[name="blueprint"]').val();
-		tileMap = new TileMap(canvas.getXTiles(), canvas.getYTiles(), canvas.getTileSize(), canvas.getApp().stage, canvas.getApp().renderer, blueprint);
+		let layers = [
+			new PIXI.Container(), 	// IndexLayer.LEVEL_1; 
+			new PIXI.Container(), 
+			new PIXI.Container(),
+			new PIXI.Container(),
+			new PIXI.Container()	// IndexLayer.LEVEL_5;
+		];
+		for(let layer of layers) {
+			canvas.getApp().stage.addChild(layer);
+		}
+		tileMap = new TileMap.TileMap(canvas.getXTiles(), canvas.getYTiles(), canvas.getTileSize(), layers, canvas.getApp().renderer, blueprint);
 	}
 
 	// UI 
 	$('#road-btn').click(function(e){
-		selectMapButton(this, VisualEntityModel.TRANSIT_ZONE, SelectionType.COLUMN);
+		selectMapButton(this, VisualEntityModel.TRANSIT_ZONE, TileMap.SelectionType.COLUMN);
 	});
 	$('#grass-btn').click(function(e){
-		selectMapButton(this, VisualEntityModel.SAFE_ZONE, SelectionType.COLUMN);
+		selectMapButton(this, VisualEntityModel.SAFE_ZONE, TileMap.SelectionType.COLUMN);
 	});
 	$('#bush-btn').click(function(e){
-		selectMapButton(this, VisualEntityModel.BUSH, SelectionType.SIMPLE);
+		selectMapButton(this, VisualEntityModel.BUSH, TileMap.SelectionType.SIMPLE);
 	});
 	$('#rock-btn').click(function(e){
-		selectMapButton(this, VisualEntityModel.ROCK, SelectionType.SIMPLE);
+		selectMapButton(this, VisualEntityModel.ROCK, TileMap.SelectionType.SIMPLE);
 	});
 	$('#powerup-btn').click(function(e){
-		selectMapButton(this, VisualEntityModel.POWER_UP_FLASH, SelectionType.SIMPLE);
+		selectMapButton(this, VisualEntityModel.POWER_UP_FLASH, TileMap.SelectionType.SIMPLE);
 	});
 	$('#motorcycle-btn').click(function(e){
-		selectMapButton(this, VisualEntityModel.MOTORCYCLE, SelectionType.SIMPLE);
+		selectMapButton(this, VisualEntityModel.MOTORCYCLE, TileMap.SelectionType.SIMPLE);
 	});
 	$('#save-map-form').on('submit', function(e){
 		var mapname = $('#save-map-form input[name="mapname"]').val();

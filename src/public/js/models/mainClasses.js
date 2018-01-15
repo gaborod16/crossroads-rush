@@ -22,12 +22,11 @@ const MapLevel = {
 }
 
 const IndexLayer = {
-    NO_LEVEL: 0,
-    LEVEL_1: 1,  // First to be drawn, therefore, on bottom.
-    LEVEL_2: 2,
-    LEVEL_3: 3,
-    LEVEL_4: 4,
-    LEVEL_5: 5   // Last to be drawn, therefore, on top.
+    LEVEL_1: 0,  // First to be drawn, therefore, on bottom.
+    LEVEL_2: 1,
+    LEVEL_3: 2,
+    LEVEL_4: 3,
+    LEVEL_5: 4   // Last to be drawn, therefore, on top.
 };
 
 class Position {
@@ -107,6 +106,12 @@ class RealPosition extends Position{
         this._realX = this._tileSize * this._x;
         this._realY = this._tileSize * this._y;
     }
+    setRealCoordinates(x,y) {
+        this._realX = x;
+        this._realY = y;
+        this._x = Math.round(this._realX);
+        this._y = Math.round(this._realY);
+    }
     clone() {
         return new RealPosition(this._x, this._y, this._tileSize, this._realX, this._realY);
     }
@@ -139,22 +144,6 @@ class VisualEntityModel {
     }
     static findByCode(code) {
         return VisualEntityModel.HASH[code];
-    }
-    static findSuperByCode(code) {
-        var vehicleRegexp = RegExp('^v*');
-        var obstacleRegexp = RegExp('^o*');
-        var bushRegexp = RegExp('^b$');
-
-        if (vehicleRegexp.test(code)) {
-            return Vehicle;
-        }
-        else if (obstacleRegexp.test(code)) {
-            return Obstacle;
-        }
-        else if (bushRegexp.test(code)) {
-            return Bush;
-        }
-        return VisualEntity;
     }
     static instantiateEntityByCode(code, id, position) {
         return new VisualEntityModel.HASH[code].getEntity(id, position);
@@ -203,13 +192,14 @@ class VisualEntity {
         this._state = state;
     }
     setSprite(sprite) {
+        sprite.x = this._position.getRealX();
+        sprite.y = this._position.getRealY();
+        sprite.width = this._position.getTileSize();
+        sprite.height = this._position.getTileSize();
         this._sprite = sprite;
     }
     update() {}
-    render() {
-        this._sprite.x = this._position.getRealX();
-        this._sprite.y = this._position.getRealY();
-    }
+    render() {}
 }
 
 class SheepInteractEntity extends VisualEntity {

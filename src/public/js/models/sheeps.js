@@ -5,7 +5,8 @@ const SheepState = {
     STANDING: 'STANDING',
     WELL_MOVED: 'WELL MOVED',
     BADLY_MOVED: 'BADLE MOVED',
-    DEAD: 'DEAD'
+    DEAD: 'DEAD',
+    EMPOWERED: 'EMPOWERED'
 }
 
 class Sheep extends SheepInteractEntity {
@@ -41,7 +42,6 @@ class Sheep extends SheepInteractEntity {
     }
     update() {
         if (this._state == SheepState.STANDING && this._move) {
-            console.log("execute");
             this._move.execute(); // updates nextPosition
             this._state = SheepState.MOVING;
         }
@@ -60,7 +60,7 @@ class Sheep extends SheepInteractEntity {
             this._move = undefined;
         }
     }
-    render() {
+    render() { 
         this._sprite.x = this._position.getRealX();
         this._sprite.y = this._position.getRealY();
     }

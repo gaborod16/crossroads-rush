@@ -36,6 +36,12 @@ class Zone extends VisualEntity {
     getMappedEntity() {
         return {zone: this._model.getCode(), entities: {}};
     }
+    render() {
+        super.render();
+        if (this._child) {
+            this._child.render();
+        }
+    }
 }
 
 // Sub classes

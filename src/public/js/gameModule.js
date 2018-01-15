@@ -74,10 +74,23 @@ var GameModule = (function() {
 
 	class Game {
 		constructor(blueprint, canvas){
-			this._map = new TileMap(canvas.getXTiles(), canvas.getYTiles(), canvas.getTileSize(), canvas.getApp().stage, canvas.getApp().renderer, blueprint, false);
+			this._layers = [
+				new PIXI.Container(), 	// IndexLayer.LEVEL_1; 
+				new PIXI.Container(), 
+				new PIXI.Container(),
+				new PIXI.Container(),
+				new PIXI.Container()	// IndexLayer.LEVEL_5;
+			];
 			this._canvas = canvas;
 			this._players = [];
 			this._winner = undefined;
+			this._addLayers();
+			this._map = new TileMap.TileMap(canvas.getXTiles(), canvas.getYTiles(), canvas.getTileSize(), this._layers, canvas.getApp().renderer, blueprint, false);
+		}
+		_addLayers() {
+			for(let layer of this._layers) {
+				this._canvas.getApp().stage.addChild(layer);
+			}
 		}
 		addPlayer(playerName) {
 			if (playerName) {
@@ -87,13 +100,8 @@ var GameModule = (function() {
 				let texture = PIXI.loader.resources[sheep.getResource()].texture;
 				let sprite = new PIXI.Sprite(texture);
 				
-				sprite.x = position.getRealX();
-				sprite.y = position.getRealY();
-				sprite.width = this._canvas.getTileSize();
-				sprite.height = this._canvas.getTileSize();
 				sheep.setSprite(sprite);
-
-				this._canvas.getApp().stage.addChild(sheep.getSprite());
+				this._layers[sheep.getLayer()].addChild(sheep.getSprite());
 
 				let player = new Player(playerName, new LocalController(sheep));
 				player.addSheep(sheep);
@@ -120,9 +128,16 @@ var GameModule = (function() {
 				if (sheep.getState() == SheepState.MOVING) {
 					let pos = sheep.getNextPosition(); // Evaluate next position (future)
 					let tile = this._map.getTile(pos.getX(), pos.getY());
+					let road = this._map.getRoad(pos.getX());
+					let mudererVehicle = undefined;
+
 					if (tile) {
 						if (tile.getZone().hasChild()) {
 							tile.getZone().getChild().interact(sheep);
+						}
+						else if(road && (mudererVehicle = road.collidedWith(pos)) != undefined ) {
+							console.log('murdered!');
+							mudererVehicle.interact(sheep);
 						}
 						else {
 							// Nothing to interact with
@@ -132,6 +147,15 @@ var GameModule = (function() {
 					else {
 						// Out of bounds
 						sheep.setState(SheepState.BADLY_MOVED);
+					}
+				}
+				else if (sheep.getState() == SheepState.STANDING) {
+					let pos = sheep.getPosition();
+					let road = this._map.getRoad(pos.getX());
+					let mudererVehicle = undefined;
+					if(road && (mudererVehicle = road.collidedWith(pos)) != undefined ) {
+						console.log('murdered!');
+						mudererVehicle.interact(sheep);
 					}
 				}
 			}

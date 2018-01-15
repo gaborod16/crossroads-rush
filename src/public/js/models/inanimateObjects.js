@@ -66,8 +66,9 @@ class PowerUp extends InanimateObject {
     }
     interact(sheep) {
         sheep.setState(SheepState.WELL_MOVED);
-        if (this._taken) {
-            return;
+        if (!this._taken) {
+            this._taken = true;
+            this._sprite.visible = false;
         }
     }
     wasTaken () {
