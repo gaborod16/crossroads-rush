@@ -10,6 +10,18 @@ block content
     small.font-weight-light Let's get the rush started!
   br
 
+  form#cancel-map-form.hidden(method='GET' action='/menu')
+  form#save-map-form(method='POST' action='/user/map/new')
+    div.input-group
+      input.form-control(placeholder='Insert the map\'s name!' name='mapname' value=mapname)
+      input.hidden(name='blueprint' value=blueprint) 
+      div.input-group-append
+        button.btn.btn-outline-primary(id='save-map-btn' type='submit') Save map
+      div.input-group-append
+        button.btn.btn-outline-danger(id='cancel-map-btn' type='submit' form='cancel-map-form') Cancel
+
+  br
+
   div#map
 
   br
@@ -19,12 +31,12 @@ block content
     +map-button('grass-btn', 'Meadow', '/assets/grass.png')
     +map-button('bush-btn', 'Bush', '/assets/bush.png')
     +map-button('rock-btn', 'Rock', '/assets/rock.png')
-    +map-button('powerup-btn', 'Car', '/assets/powerup.png')
-    +map-button('car-btn', 'Car', '/assets/car.png')
-    +map-button('config-map-btn','Configure map', '/assets/gear.png')
+    +map-button('powerup-btn', 'Random Power', '/assets/powerup.png')
+    +map-button('motorcycle-btn', 'Motorcycle', '/assets/motorcycle.png')
 
 
 block scripts
   script(src='/js/pixi.min.js')
   include classes_scripts
+  script(src='/js/initializeCanvas.js')
   script(src='/js/map_creator.js')

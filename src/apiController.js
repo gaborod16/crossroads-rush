@@ -92,15 +92,15 @@ router.get('/menu/main', function (req, res) {
 // MAPS MENU SCREEN
 router.get('/menu/maps', function (req, res) {
 	verifySession(req, res, 
-		function (req, res) {
-
-			var maps = [
-				{id: 1, name: 'map1ha', owner: 'gabe'},
-				{id: 2, name: 'map2', owner: 'gabe'},
-				{id: 3, name: 'map3', owner: 'gabe'}
-			];
-
-			res.status(200).render('map_menu', {maps: maps});
+		function(req, res) {
+			GameMap.find(
+				{
+					owner: req.session.username
+				},
+				function (err, maps) {
+					res.status(200).render('map_menu', {maps: maps});
+				}
+			);
 		}
 	);
 });
@@ -109,7 +109,61 @@ router.get('/menu/maps', function (req, res) {
 router.get('/map_creator', function (req, res) {
 	verifySession(req, res, 
 		function (req, res) {
-			res.status(200).render('map_creator', {map: 'map here!'});
+			if (!req.query.mapname) {
+				res.status(200).render('map_creator');
+			}
+			else {
+				console.log(req.query.mapname);
+				GameMap.findOne(
+					{
+						name: req.query.mapname
+					},
+					function (err, map) {
+						res.status(200).render('map_creator', {
+							mapname: map.name, 
+							blueprint: JSON.stringify(map.blueprint)
+						});
+					}
+				);
+			}
+		}
+	);
+});
+
+// PLAY OFFLINE MENU SCREEN
+router.get('/menu/play_offline', function (req, res) {
+	verifySession(req, res, 
+		function(req, res) {
+			GameMap.find(
+				{
+					owner: req.session.username
+				},
+				function (err, maps) {
+					res.status(200).render('play_offline_menu', {maps: maps});
+				}
+			);
+		}
+	);
+});
+
+// GAME SCREEN
+router.get('/game', function (req, res) {
+	verifySession(req, res, 
+		function (req, res) {
+			if (req.query.mapname) {
+				console.log('Playing: ' + req.query.mapname);
+				GameMap.findOne(
+					{
+						name: req.query.mapname
+					},
+					function (err, map) {
+						res.status(200).render('game_play', {
+							mapname: map.name,
+							blueprint: JSON.stringify(map.blueprint)
+						});
+					}
+				);
+			}
 		}
 	);
 });
@@ -118,12 +172,14 @@ router.get('/map_creator', function (req, res) {
 router.get('/user/maps', function (req, res) {
 	verifySession(req, res, 
 		function (req, res) {
-			var maps = [
-				{id: 1, name: 'map1', owner: 'gabe'},
-				{id: 2, name: 'map2', owner: 'gabe'},
-				{id: 3, name: 'map3', owner: 'gabe'}
-			];
-			res.status(200).send(maps);
+			GameMap.find(
+				{
+					owner: req.session.username
+				},
+				function (err, maps) {
+					res.status(200).send(maps);
+				}
+			);
 		}
 	);
 });
@@ -137,17 +193,17 @@ router.post('/user/map/new', function (req, res) {
 	verifySession(req, res, 
 		function (req, res) {
 			GameMap.create({
-				name: req.body.name,
-				owner: req.body.owner,
-				size: req.body.size,
-				config: req.body.config,
-				text: req.body.text
+				name: req.body.mapname,
+				owner: req.session.username,
+				blueprint: JSON.parse(req.body.blueprint)
 			},
 			function (err, gameMap) {
 				if (err || gameMap == null) {
+					console.log(err);
 					return res.status(500).send("There was a problem creating the map: " + err);
 				}
 				console.log("Map created successfully!");
+				res.status(200).redirect('/menu');
 			});
 		}
 	);

@@ -20,5 +20,8 @@ block menu-content
 			each map in maps
 				option(value=map.id) #{map.name}
 
-	+menu-submit-button('Edit map', 'edit-map-btn', '/map_creator')
+	form#edit-map-form(method='GET' action='/map_creator')
+		input.hidden(name='mapname')
+		button.btn.btn-lg.btn-outline-primary.btn-block(id='edit-map-btn' type='submit') Edit map
+
 	+menu-button('Delete map', 'del-map-btn')

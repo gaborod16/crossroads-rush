@@ -1,0 +1,22 @@
+extends wide_layout
+
+block content
+  h3 Map creator! 
+    small.font-weight-light Let the rush begin!
+  h3 
+    small.font-weight-light Map: #{mapname}.
+  br
+  input.hidden(id='blueprint' value=blueprint)
+
+  br
+
+  div#map
+
+
+block scripts
+  script(src='/js/pixi.min.js')
+  include classes_scripts
+  script(src='/js/moveCommands.js')
+  script(src='/js/initializeCanvas.js')
+  script(src='/js/gameModule.js')
+  script(src='/js/runGame.js')

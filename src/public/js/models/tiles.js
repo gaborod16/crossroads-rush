@@ -9,7 +9,7 @@ const SelectionType = {
 };
 
 class TileMap {
-	constructor (xTiles, yTiles, tileSize, stage, renderer) {
+	constructor (xTiles, yTiles, tileSize, stage, renderer, blueprint=undefined, isEditor=true) {
 		// Initialize Tile static properties
 		Tile.stage = stage;
 		Tile.size = tileSize;
@@ -24,16 +24,26 @@ class TileMap {
 		this._tileSize = tileSize;
 		this._createTileTexture();
 		this._grid = [];
+		this._level = MapLevel.LEVEL_1;
 
-		for (var i = 0; i < xTiles; i++) {
-			this._grid[i] = [];
-			for (var j = 0; j < yTiles; j++) {
-				this._grid[i][j] = new Tile(new Position(i*tileSize,j*tileSize));
-				this._grid[i][j].setMouseOverEvent(this.genTileMouseover(this._grid, i, j));
-				this._grid[i][j].setMouseOutEvent(this.genTileMouseout(this._grid, i, j));
-				this._grid[i][j].setMouseClickEvent(this.genTileMouseClick(this._grid, i, j));
+		if (blueprint) {
+			this._generateFromBlueprint(blueprint, isEditor);
+		}
+		else {
+			for (var i = 0; i < xTiles; i++) {
+				this._grid[i] = [];
+				for (var j = 0; j < yTiles; j++) {
+					this._grid[i][j] = new Tile(new Position(i,j,tileSize));
+					this._setTileEvents(i,j);
+				}
 			}
 		}
+	}
+
+	_setTileEvents(i,j) {
+		this._grid[i][j].setMouseOverEvent(this.genTileMouseover(this._grid, i, j));
+		this._grid[i][j].setMouseOutEvent(this.genTileMouseout(this._grid, i, j));
+		this._grid[i][j].setMouseClickEvent(this.genTileMouseClick(this._grid, i, j));
 	}
 
 	resetSelection () {
@@ -89,12 +99,12 @@ class TileMap {
 			switch (Tile.selectionType) {
 				case SelectionType.COLUMN:
 					for (var i = 0; i < tilesMap[column].length; i++) {
-						tilesMap[column][i].changeZone(Tile.selectedModel);
+						tilesMap[column][i].setZoneWithModel(Tile.selectedModel);
 					}
 					break;
 
 				case SelectionType.SIMPLE:
-					tilesMap[column][row].changeChild(Tile.selectedModel);
+					tilesMap[column][row].setChildWithModel(Tile.selectedModel);
 					break;
 
 				default:
@@ -103,13 +113,17 @@ class TileMap {
 		}
 	}
 
-	getTextMap () {
+	getTile(x,y) {
+		return this._grid[x]? this._grid[x][y] : undefined;
+	}
+
+	getMapBlueprint () {
 		var textMap = {
 			size: {cols: this._cols, rows: this._rows},
 			config: {
 				sheepSpeed: 1.0,
 				nLives: 1,
-				level: GameLevel.LEVEL_1.code
+				level: MapLevel.LEVEL_1.code
 			},
 			rawMap: []
 		};
@@ -118,7 +132,7 @@ class TileMap {
 			textMap.rawMap[i] = this._grid[i][0].getZone().getMappedEntity();
 			for (var j = 0; j < this._rows; j++) {
 				if (this._grid[i][j].getChild()) {
-					textMap.rawMap[i].entities.push(this._grid[i][j].getChild().getMappedEntity());
+					textMap.rawMap[i].entities[j] = this._grid[i][j].getChild().getMappedEntity();
 				}
 			}
 		}
@@ -133,23 +147,148 @@ class TileMap {
 		tile.endFill();
 		Tile.defaultTileTexture = this._renderer.generateTexture(tile);
 	}
+
+	_generateFromBlueprint (blueprint, isEditor) {
+		var fMap = JSON.parse(blueprint)[0]; //formattedMap
+		var currentZoneModel = undefined;
+
+		if (isEditor) {
+			for (var i = 0; i < this._cols; i++) {
+				currentZoneModel = VisualEntityModel.findByCode(fMap.rawMap[i].zone);
+				this._grid[i] = [];
+				for (var j = 0; j < this._rows; j++) {
+					this._grid[i][j] = new Tile(new Position(i,j,this._tileSize));
+					this._setTileEvents(i,j); // This is the only line that is different. It should be refactored
+					this._grid[i][j].setZoneWithModel(currentZoneModel);
+					
+					if (fMap.rawMap[i].entities && fMap.rawMap[i].entities[j]) {
+						this._grid[i][j].setChildWithModel(
+							VisualEntityModel.findByCode(fMap.rawMap[i].entities[j].code)
+						);
+					}
+				}
+			}
+		}
+		else {
+			for (var i = 0; i < this._cols; i++) {
+				currentZoneModel = VisualEntityModel.findByCode(fMap.rawMap[i].zone);
+				this._grid[i] = [];
+				for (var j = 0; j < this._rows; j++) {
+					this._grid[i][j] = new Tile(new Position(i,j,this._tileSize));
+					this._grid[i][j].setZoneWithModel(currentZoneModel);
+
+					if (fMap.rawMap[i].entities && fMap.rawMap[i].entities[j]) {
+						let entity = fMap.rawMap[i].entities[j];
+						let entitySuper = VisualEntityModel.findSuperByCode(entity.code);
+
+						if (entitySuper == Vehicle) { // Vehicle
+							console.log('vehicle');
+							this._grid[i][j].createVehicle (
+								VisualEntityModel.findByCode(entity.code)
+							);
+						}
+						else {
+							console.log('vehicle');
+							this._grid[i][j].setChildWithModel (
+								VisualEntityModel.findByCode(entity.code)
+							);
+						}
+					}
+				}
+			}
+		}
+		console.log(this);
+	}
+	generateVehicles() {
+		for (let column of this._grid) {
+			//if can gen, gen
+		}
+	}
+	canGenerateVehicle(column) {
+		for (let i = this._rows - this._level.vehicleSpace; i < this._rows; i++) {
+			if (column[i].getZone().hasChild()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	update() {
+		for (let column of this._grid) {
+			if (column[0].getZone() instanceof TransitZone) {
+				for (var i = 0; i < column.length; i++) {
+					// check if has vehicle
+					if (column[i].hasVehicleChild()) {
+						let vehicle = column[i].getChild();
+						vehicle.move();
+						// check if vehicle changed tiles
+						if (vehicle.getPosition().getY() < i) {
+							column[i].removeVehicle();
+							if (i != 0) {
+								column[i-1].addVehicle(vehicle);
+							}
+							else {
+								// column[this._rows-1].addVehicle(vehicle);
+								column[this._rows-1].createVehicle(vehicle.getModel());
+
+								// this._grid[i][j].createVehicle (
+								// 	VisualEntityModel.findByCode(entity.code)
+								// );
+								// Tile.stage.removeChild(vehicle);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	render() {
+		for (let column of this._grid) {
+			for (var i = 0; i < column.length; i++) {
+				if (column[i].getChild()) {
+					column[i].getChild().render();
+				}
+			}
+		}
+	}
 }
 
 class Tile {
 	constructor (position) {
 		this._tile = new PIXI.Sprite(Tile.defaultTileTexture);
-		this._tile.x = position.getX();
-		this._tile.y = position.getY();
+		this._tile.x = position.getRealX();
+		this._tile.y = position.getRealY();
 		this._tile.width = Tile.size;
 		this._tile.height = Tile.size;
 		this._tile.interactive = true;
-		this._position = new Position(
-			Math.floor(position.getX()/Tile.size),
-			Math.floor(position.getY()/Tile.size)
-		);
+		this._position = position;
 		this._zone = undefined;
 
 		Tile.stage.addChild(this._tile);
+	}
+
+	removeVehicle () {
+		this._tile.removeChild(this._zone.getChild().getSprite());
+		this._zone.removeChild();
+	}
+
+	addVehicle (vehicle) {
+		this._zone.setChild(vehicle);
+		this._tile.addChild(this._zone.getChild().getSprite());
+	}
+
+	createVehicle (vehicleModel) {
+		let vehicle = vehicleModel.instantiateEntity(0, new RealPosition(this._position.getX(), this._position.getY(), Tile.size));
+		let texture = PIXI.loader.resources[vehicle.getResource()].texture
+		let sprite = new PIXI.Sprite(texture);
+		sprite.x = vehicle.getPosition().getRealX();
+		sprite.y = vehicle.getPosition().getRealY();
+		sprite.width = Tile.size;
+		sprite.height = Tile.size;
+
+		vehicle.setSprite(sprite);
+		this._zone.setChild(vehicle);
+		Tile.stage.addChild(this._zone.getChild().getSprite());
 	}
 
 	_removeChild () {
@@ -165,17 +304,20 @@ class Tile {
 		return this._zone.getChild();
 	}
 
+	hasVehicleChild () {
+		return this._zone.getChild() && this._zone.getChild() instanceof Vehicle;
+	}
+
 	tint (color) {
 		this._tile.tint = color;
 	}
 
-	changeZone (zoneModel) {
+	setZoneWithModel (zoneModel) {
 		this._zone = zoneModel.instantiateEntity(0, this._position);
 		this._tile.texture = PIXI.loader.resources[this._zone.getResource()].texture;
 	}
 
-	changeChild (childModel) {
-		console.log(this._position);
+	setChildWithModel (childModel) {
 		if (this._zone.allowsChildModel(childModel)) {
 			if (this._zone.hasChild()) {
 				let onlyRemove = this._zone.getChild().getModel() == childModel;

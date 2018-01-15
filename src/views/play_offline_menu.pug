@@ -1,0 +1,14 @@
+extends menu_skeleton
+
+block menu-content
+
+	div.input-group.btn-block
+		div.input-group-prepend
+			button.btn.btn-primary(type='button' disabled) Pick a map!
+		select.custom-select(id='mapSelection')
+			each map in maps
+				option(value=map.id) #{map.name}
+
+	form#play-map-form(method='GET' action='/game')
+		input.hidden(name='mapname')
+		button.btn.btn-lg.btn-outline-primary.btn-block(id='play-map-btn' type='submit') Play map!

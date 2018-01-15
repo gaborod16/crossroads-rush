@@ -1,23 +1,23 @@
-const GameLevel = {
+const MapLevel = {
     LEVEL_1: {
         code: 'LEVEL_1',
-        carSpace: 6 // Number of cells before appearing another car
+        vehicleSpace: 6 // Number of cells before appearing another car
     },
     LEVEL_2: {
         code: 'LEVEL_2',
-        carSpace: 5
+        vehicleSpace: 5
     },
     LEVEL_3: {
         code: 'LEVEL_3',
-        carSpace: 4
+        vehicleSpace: 4
     },
     LEVEL_4: {
         code: 'LEVEL_4',
-        carSpace: 3
+        vehicleSpace: 3
     },
     LEVEL_5: {
         code: 'LEVEL_5',
-        carSpace: 2
+        vehicleSpace: 2
     } 
 }
 
@@ -31,15 +31,87 @@ const IndexLayer = {
 };
 
 class Position {
-    constructor(x,y) {
+    constructor(x,y,tileSize) {
         this._x = x;
         this._y = y;
+        this._tileSize = tileSize;
     }
     getX() {
         return this._x;
     }
     getY() {
         return this._y;
+    }
+    getTileSize() {
+        return this._tileSize;
+    }
+    getRealX() {
+        return this._tileSize * this._x;
+    }
+    getRealY() {
+        return this._tileSize * this._y;
+    }
+    update(x,y) {
+        this._x = this._x + x;
+        this._y = this._y + y;
+    }
+    setCoordinates(x,y) {
+        this._x = x;
+        this._y = y;
+    }
+    clone() {
+        return new Position(this._x, this._y, this._tileSize);
+    }
+    isEquals(position) {
+        return position.getX() == this._x && position.getY() == this._y;
+    }
+}
+
+class RealPosition extends Position{
+    constructor(x,y,tileSize,rx=undefined,ry=undefined) {
+        super(x,y,tileSize);
+        if (rx) {
+            this._realX = rx;
+        }
+        else {
+            this._realX = this._tileSize * this._x;
+        }
+        if (ry) {
+            this._realY = ry;
+        }
+        else {
+            this._realY = this._tileSize * this._y;
+        }
+    }
+    getRealX() {
+        return this._realX;
+    }
+    getRealY() {
+        return this._realY;
+    }
+    update(x,y) {
+        this._x = this._x + x;
+        this._y = this._y + y;
+        this._realX = this._tileSize * this._x;
+        this._realY = this._tileSize * this._y;
+    }
+    updateReal(x,y) {
+        this._realX = this._realX + x;
+        this._realY = this._realY + y;
+        this._x = Math.round(this._realX);
+        this._y = Math.round(this._realY);
+    }
+    setCoordinates(x,y) {
+        this._x = x;
+        this._y = y;
+        this._realX = this._tileSize * this._x;
+        this._realY = this._tileSize * this._y;
+    }
+    clone() {
+        return new RealPosition(this._x, this._y, this._tileSize, this._realX, this._realY);
+    }
+    isEquals(position) {
+        return position.getRealX() == this._realX && position.getRealY() == this._realY;
     }
 }
 
@@ -68,6 +140,22 @@ class VisualEntityModel {
     static findByCode(code) {
         return VisualEntityModel.HASH[code];
     }
+    static findSuperByCode(code) {
+        var vehicleRegexp = RegExp('^v*');
+        var obstacleRegexp = RegExp('^o*');
+        var bushRegexp = RegExp('^b$');
+
+        if (vehicleRegexp.test(code)) {
+            return Vehicle;
+        }
+        else if (obstacleRegexp.test(code)) {
+            return Obstacle;
+        }
+        else if (bushRegexp.test(code)) {
+            return Bush;
+        }
+        return VisualEntity;
+    }
     static instantiateEntityByCode(code, id, position) {
         return new VisualEntityModel.HASH[code].getEntity(id, position);
     }
@@ -82,6 +170,7 @@ class VisualEntity {
         this._layer = IndexLayer.NO_LEVEL;
         this._position = position;
         this._sprite = undefined;
+        this._state = undefined;
     }
     getId() {
         return this._id;
@@ -107,21 +196,25 @@ class VisualEntity {
     getMappedEntity() {
         return ''
     }
+    getState() {
+        return this._state;
+    }
+    setState(state) {
+        this._state = state;
+    }
     setSprite(sprite) {
         this._sprite = sprite;
     }
+    update() {}
+    render() {
+        this._sprite.x = this._position.getRealX();
+        this._sprite.y = this._position.getRealY();
+    }
 }
 
-class MobileEntity extends VisualEntity {
-    constructor(id, position) {
-        super(id, position);
-        this._moveCommand = undefined;
+class SheepInteractEntity extends VisualEntity {
+    constructor(id, position, model=VisualEntityModel.DEFAULT) {
+        super(id, position, model);
     }
-    consumeMove() {
-        this._moveCommand.apply();
-        this._moveCommand = undefined;
-    }
-    addMoveCommand(command) {
-        this._moveCommand = command;
-    }
+    interact(sheep) {}
 }

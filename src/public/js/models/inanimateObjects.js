@@ -10,7 +10,7 @@ VisualEntityModel.POWER_UP_BULLY = new VisualEntityModel('pwb', '/assets/powerup
 
 
 // Super class
-class InanimateObject extends VisualEntity {
+class InanimateObject extends SheepInteractEntity {
     constructor (id, position, model=VisualEntityModel.DEFAULT) {
         super(id, position, model);
         this._layer = IndexLayer.LEVEL_2;
@@ -27,6 +27,11 @@ class Bush extends InanimateObject {
         this._layer = IndexLayer.LEVEL_4;
         this._sheeps = [];
     }
+
+    interact(sheep) {
+        //hide sheep
+        sheep.setState(SheepState.WELL_MOVED);
+    }
 }
 VisualEntityModel.BUSH.setEntity(Bush);
 
@@ -34,9 +39,9 @@ VisualEntityModel.BUSH.setEntity(Bush);
 class Obstacle extends InanimateObject {
     constructor (id, position, model=VisualEntityModel.DEFAULT) {
         super(id, position, model);
-        // if (this.constructor === Obstacle) {
-        //     throw new Error("Can't instantiate abstract class!");
-        // }
+    }
+    interact(sheep) {
+        sheep.setState(SheepState.BADLY_MOVED);
     }
 }
 class Tree extends Obstacle {
@@ -58,12 +63,12 @@ class PowerUp extends InanimateObject {
     constructor (id, position, model=VisualEntityModel.DEFAULT) {
         super(id, position, model);
         this._taken = false;
-        // if (this.constructor === Obstacle) {
-        //     throw new Error("Can't instantiate abstract class!");
-        // }
     }
-    pickUp () {
-        this._taken = true;
+    interact(sheep) {
+        sheep.setState(SheepState.WELL_MOVED);
+        if (this._taken) {
+            return;
+        }
     }
     wasTaken () {
         return this._taken;
@@ -75,12 +80,22 @@ class RandomPower extends PowerUp {
         super(id, position, VisualEntityModel.POWER_UP_RANDOM);
         this._power = new ParkourPower(id, position);
     }
+    interact(sheep) {
+        super.interact(sheep); // if it passes, it wasn't taken
+        // empower sheep
+        this._taken = true;
+    }
 }
 VisualEntityModel.POWER_UP_RANDOM.setEntity(RandomPower);
 
 class ParkourPower extends PowerUp {
     constructor (id, position) {
         super(id, position, VisualEntityModel.POWER_UP_PARKOUR);
+    }
+    interact(sheep) {
+        super.interact(sheep); // if it passes, it wasn't taken
+        // empower sheep
+        this._taken = true;
     }
 }
 VisualEntityModel.POWER_UP_PARKOUR.setEntity(ParkourPower);
@@ -89,6 +104,11 @@ class IronPower extends PowerUp {
     constructor (id, position) {
         super(id, position, VisualEntityModel.POWER_UP_IRON);
     }
+    interact(sheep) {
+        super.interact(sheep); // if it passes, it wasn't taken
+        // empower sheep
+        this._taken = true;
+    }
 }
 VisualEntityModel.POWER_UP_IRON.setEntity(IronPower);
 
@@ -96,12 +116,22 @@ class FlashPower extends PowerUp {
     constructor (id, position) {
         super(id, position, VisualEntityModel.POWER_UP_FLASH);
     }
+    interact(sheep) {
+        super.interact(sheep); // if it passes, it wasn't taken
+        // empower sheep
+        this._taken = true;
+    }
 }
 VisualEntityModel.POWER_UP_FLASH.setEntity(FlashPower);
 
 class BullyPower extends PowerUp {
     constructor (id, position) {
         super(id, position, VisualEntityModel.POWER_UP_BULLY);
+    }
+    interact(sheep) {
+        super.interact(sheep); // if it passes, it wasn't taken
+        // empower sheep
+        this._taken = true;
     }
 }
 VisualEntityModel.POWER_UP_BULLY.setEntity(BullyPower);
