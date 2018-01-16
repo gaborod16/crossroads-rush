@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "test",
-    "start": "nodejs src/server.js"
+    "start": "node src/server.js"
   },
   "repository": {
     "type": "git",
